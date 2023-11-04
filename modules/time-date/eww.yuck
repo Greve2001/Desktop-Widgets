@@ -1,0 +1,8 @@
+(defwidget _time-date 
+  (box :class "time-date"
+    (label :text "Test2")
+  )
+)
+
+
+

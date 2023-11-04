@@ -1,0 +1,29 @@
+* {
+  all: unset;
+
+  font-size: 20px;
+}
+
+.bar {
+  background-color: #000;
+}
+
+// Workspaces
+.workspace-icon {
+  margin: 10px;
+
+  &.empty {
+    color: grey;
+  }
+
+  &.in-use {
+    color: white;
+  }
+
+  &.focus {
+    color: orange;
+  }
+
+}
+
+
