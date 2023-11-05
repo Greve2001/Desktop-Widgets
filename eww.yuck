@@ -22,6 +22,7 @@
 (defwidget right-group []
   (box :class "right-group" :space-evenly false :halign "end"
     (spacer :icon "")
+    (speaker) 
     (network)
     (battery)
   )    
@@ -73,19 +74,40 @@
 ; Microphone
 ;(defwidget microphone [])
 
+
 ; Speaker
-;(defwidget speaker [])
+(defpoll muted :interval "60s" :initial ""
+  `wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk -F '[][]' '{print $2}'`
+)
+(defpoll volume :interval "60s" :initial ""
+  `wpctl get-volume @DEFAULT_AUDIO_SINK@ | 
+    awk -F'[: ]+' '/Volume:/ {print $2}'` 
+)
+
+(defwidget speaker []
+  (box :class "speaker icon" 
+       :tooltip "${muted == "MUTED" ? "Muted" : "Volume"}: ${volume * 100}"
+    (label :text { 
+      muted == "MUTED" ? "󰖁" : "${
+        volume < 0.33 ? "󰕿" :
+        volume < 0.66 ? "󰖀" :
+        "󰕾"
+      }"
+    })
+  )
+)
+
 
 ; Battery
 (defpoll bat-cap :interval "60s" :initial "N/A"
   `cat /sys/class/power_supply/BAT0/capacity`
 )
 (defpoll ac :interval "60s" :initial "N/A"
-  'cat /sys/class/power_supply/AC/online'
+  `cat /sys/class/power_supply/AC/online`
 )
 
 (defwidget battery []
-  (box :class "battery icon"
+  (box :class "battery icon" :tooltip "Battery: ${bat-cap}"
     (label :text { ac == "1" ? "${  
         ; Charging 
         bat-cap < 25 ? "󰢟" :
