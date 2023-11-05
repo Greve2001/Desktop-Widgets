@@ -4,8 +4,7 @@
 ))
 
 
-; ---- Compartments ----;
-
+; ---- Grouppings ----;
 (defwidget left-group []
   (box :class "left-group" :space-evenly false :halign "start"
     (time-date)
@@ -23,7 +22,8 @@
 (defwidget right-group []
   (box :class "right-group" :space-evenly false :halign "end"
     (spacer :icon "")
-    "Something elsse"
+    (network)
+    (battery)
   )    
 )
 
@@ -32,28 +32,7 @@
 ; ---- Actual Components ---- ;
 ; Time - Date
 (defpoll time :interval "10s" "date '+%H:%M | %d. %b'")
-(defwidget time-date []
-    time
-)
-
-
-; Workspaces
-(deflisten workspaces :initial "[]" "bash ~/.config/eww/scripts/get-workspaces")
-(deflisten current_workspace :initial "1" "bash ~/.config/eww/scripts/get-active-workspace")
-
-(defwidget workspaces []
-  (box :class "workspaces" :space-evenly true
-    (label :text "${workspaces}${current_workspace}" :visible false)
-    (for workspace in workspaces
-      (eventbox :onclick "hyprctl dispatch workspace ${workspace.id}"
-        (box :class "workspace-icon ${workspace.id == current_workspace ? "focus" : ""} ${workspace.windows > 0 ? "in-use" : "empty"}"
-          (label :text " ${workspace.id}")
-        )
-      )
-    )
-  )
-)
-
+(defwidget time-date [] time)
 
 ; System tray
 (defvar tray-elements "[1, 2, 3, 4]")
@@ -67,7 +46,6 @@
   )
 )
 
-
 ; Spacer
 (defwidget spacer [?icon]
   (box :class "spacer"
@@ -75,8 +53,82 @@
   )
 )
 
+; Network - (Make support ethernet connection)
+(defpoll net :interval "60s" :initial "N/A"
+  `nmcli -t -f SIGNAL,ACTIVE dev wifi \
+  | awk -F':' '{if($2=="yes")print$1}'`)
 
-; Windows ; 
+(defwidget network []
+  (box :class "network icon" :tooltip "Signal Strength: ${net}"
+    (label :text {
+      net == "" ? "󰤭" : ; Offline
+      net < 26 ? "󰤟" :  ; Bad
+      net < 51 ? "󰤢" :  ; Okay
+      net < 76 ? "󰤥" :  ; Good
+      "󰤨"}              ; Excellent
+    )
+  )
+)
+
+; Microphone
+;(defwidget microphone [])
+
+; Speaker
+;(defwidget speaker [])
+
+; Battery
+(defpoll bat-cap :interval "60s" :initial "N/A"
+  `cat /sys/class/power_supply/BAT0/capacity`
+)
+(defpoll ac :interval "60s" :initial "N/A"
+  'cat /sys/class/power_supply/AC/online'
+)
+
+(defwidget battery []
+  (box :class "battery icon"
+    (label :text { ac == "1" ? "${  
+        ; Charging 
+        bat-cap < 25 ? "󰢟" :
+        bat-cap < 50 ? "󱊤" :
+        bat-cap < 75 ? "󱊥" :
+        "󱊦" 
+    }" : "${
+        ; Discharging
+        bat-cap < 25 ? "󰂎" :
+        bat-cap < 50 ? "󱊡" :
+        bat-cap < 75 ? "󱊢" :
+        "󱊣"
+    }" }
+    )
+  )
+)
+
+; Brightness
+;(defwidget brightness [])
+
+
+
+; Workspaces
+(deflisten workspaces :initial "[]" "bash ~/.config/eww/scripts/get-workspaces")
+(deflisten current_workspace :initial "1" "bash ~/.config/eww/scripts/get-active-workspace")
+
+(defwidget workspaces []
+  (box :class "workspaces" :space-evenly true
+    (label :text "${workspaces}${current_workspace}" :visible false)
+    (for workspace in workspaces
+      (eventbox :onclick "hyprctl dispatch workspace ${workspace.id}"
+        (box :class "workspace-icon ${workspace.id == current_workspace ? "focus" : ""} ${workspace.windows > 0 ? "in-use" : "empty"}"
+          (label :text "${workspace.id}")
+        )
+      )
+    )
+  )
+)
+
+
+
+
+; ---- Windows ----;
 (defwindow bar1
   :monitor 1
   :stacking "fg"

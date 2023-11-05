@@ -1,7 +1,9 @@
 * {
   all: unset;
 
-  font-size: 20px;
+  font-size: 26px;
+  font-weight: bold;
+
   //border: 1px solid white;
 }
 
@@ -16,14 +18,27 @@
 .left-group, .middle-group, .right-group {
   margin: 0px 15px 0px 15px;
 
-  & > * { // Children
-  
-  }
+  //& > * { // Children
+  //  margin: 0px 20px 0px 20px;  
+  //}
 }
+
+
+.left-group {
+  
+}
+.middle-group {
+
+}
+.left-group {
+
+}
+
+
 
 // Workspaces
 .workspace-icon {
-  margin: 10px;
+  margin: 0px 10px 0px 10px;
 
   &.empty {
     color: grey;
@@ -41,8 +56,14 @@
 
 // System Tray
 .system-tray-element {
-  margin: 10px;
+  margin: 0px 10px 0px 10px;
 }
+
+
+// Icons
+.icon {
+  margin: 0px 20px 0px 20px;
+} 
 
 
 // Spacer
