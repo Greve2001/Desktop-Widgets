@@ -22,6 +22,8 @@
 (defwidget right-group []
   (box :class "right-group" :space-evenly false :halign "end"
     (spacer :icon "")
+    (brightness)
+    (microphone)
     (speaker) 
     (network)
     (battery)
@@ -60,7 +62,7 @@
   | awk -F':' '{if($2=="yes")print$1}'`)
 
 (defwidget network []
-  (box :class "network icon" :tooltip "Signal Strength: ${net}"
+  (box :class "network icon" :tooltip "Signal Strength: ${net}%"
     (label :text {
       net == "" ? "󰤭" : ; Offline
       net < 26 ? "󰤟" :  ; Bad
@@ -71,31 +73,65 @@
   )
 )
 
-; Microphone
-;(defwidget microphone [])
-
 
 ; Speaker
-(defpoll muted :interval "60s" :initial ""
+(defpoll speaker-muted :interval "60s" :initial ""
   `wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk -F '[][]' '{print $2}'`
 )
-(defpoll volume :interval "60s" :initial ""
+(defpoll speaker-volume :interval "60s" :initial ""
   `wpctl get-volume @DEFAULT_AUDIO_SINK@ | 
     awk -F'[: ]+' '/Volume:/ {print $2}'` 
 )
 
 (defwidget speaker []
   (box :class "speaker icon" 
-       :tooltip "${muted == "MUTED" ? "Muted" : "Volume"}: ${volume * 100}"
+       :tooltip "${speaker-muted == "MUTED" ? "Muted" : "Volume"}: ${speaker-volume * 100}%"
     (label :text { 
-      muted == "MUTED" ? "󰖁" : "${
-        volume < 0.33 ? "󰕿" :
-        volume < 0.66 ? "󰖀" :
+      speaker-muted == "MUTED" ? "󰖁" : "${
+        speaker-volume < 0.33 ? "󰕿" :
+        speaker-volume < 0.66 ? "󰖀" :
         "󰕾"
       }"
     })
   )
 )
+
+
+; Microphone
+(defpoll microphone-muted :interval "60s" :initial ""
+  `wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | awk -F '[][]' '{print $2}'`
+)
+(defpoll microphone-volume :interval "60s" :initial ""
+  `wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | 
+    awk -F'[: ]+' '/Volume:/ {print $2}'` 
+)
+
+(defwidget microphone []
+  (box :class "microphone icon" 
+       :tooltip "${microphone-muted == "MUTED" ? "Muted" : "Volume"}: ${microphone-volume * 100}%"
+    (label :text { microphone-muted == "MUTED" ? "󰍭" : "󰍬" })
+  )
+)
+
+
+; Brightness
+(defpoll max-b :interval "24h" :initial "" 
+  `brightnessctl m`
+)
+(defpoll curr-b :interval "60s" :initial "" 
+  `brightnessctl g`
+)
+
+(defwidget brightness []
+  (box :class "brightness icon" :tooltip "Brightness: ${curr-b / max-b * 100}%"
+    (label :text { 
+      curr-b/max-b*100 < 33 ? "󰃞" :
+      curr-b/max-b*100 < 66 ? "󰃟" :
+      "󰃠"
+    })
+  )
+)
+
 
 
 ; Battery
@@ -107,7 +143,7 @@
 )
 
 (defwidget battery []
-  (box :class "battery icon" :tooltip "Battery: ${bat-cap}"
+  (box :class "battery icon" :tooltip "Battery: ${bat-cap}%"
     (label :text { ac == "1" ? "${  
         ; Charging 
         bat-cap < 25 ? "󰢟" :
@@ -124,10 +160,6 @@
     )
   )
 )
-
-; Brightness
-;(defwidget brightness [])
-
 
 
 ; Workspaces
