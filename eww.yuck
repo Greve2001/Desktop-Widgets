@@ -61,11 +61,14 @@
 
 ; Network - (Make support ethernet connection)
 (defpoll net :interval "60s" :initial "N/A"
-  `nmcli -t -f SIGNAL,ACTIVE dev wifi \
-  | awk -F':' '{if($2=="yes")print$1}'`)
+  `nmcli -t -f SIGNAL,ACTIVE dev wifi | awk -F':' '{if($2=="yes")print$1}'`)
+
+(defpoll ssid :interval "60s" :initial "N/A"
+  `nmcli -t -f SSID,ACTIVE dev wifi | awk -F':' '{if($2=="yes")print$1}'`)
 
 (defwidget network []
-  (box :class "network icon" :tooltip "Signal Strength: ${net}%"
+  (box :class "network icon" 
+       :tooltip "${ssid}: ${net}%"
     (label :text {
       net == "" ? "󰤭" : ; Offline
       net < 26 ? "󰤟" :  ; Bad
@@ -78,30 +81,32 @@
 
 
 ; Speaker
-(defpoll speaker-muted :interval "60s" :initial ""
+(defpoll speaker-muted :interval "1s" :initial ""
   `wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk -F '[][]' '{print $2}'`
 )
-(defpoll speaker-volume :interval "60s" :initial ""
+(defpoll speaker-volume :interval "1s" :initial ""
   `wpctl get-volume @DEFAULT_AUDIO_SINK@ | 
     awk -F'[: ]+' '/Volume:/ {print $2}'` 
 )
 
 (defwidget speaker []
-  (box :class "speaker icon" 
-       :tooltip "${speaker-muted == "MUTED" ? "Muted" : "Volume"}: ${speaker-volume * 100}%"
-    (label :text { 
-      speaker-muted == "MUTED" ? "󰖁" : "${
-        speaker-volume < 0.33 ? "󰕿" :
-        speaker-volume < 0.66 ? "󰖀" :
-        "󰕾"
-      }"
-    })
+  (box :class "speaker icon clickable" 
+       :tooltip "${speaker-muted == "MUTED" ? "Muted" : "Volume"}: ${speaker-volume * 100}%"  
+    (button :onclick "wpctl set-mute @DEFAULT_SINK@ toggle"
+      (label :text { 
+        speaker-muted == "MUTED" ? "󰖁" : "${
+          speaker-volume < 0.33 ? "󰕿" :
+          speaker-volume < 0.66 ? "󰖀" :
+          "󰕾"
+        }"
+      })
+    )
   )
 )
 
 
 ; Microphone
-(defpoll microphone-muted :interval "60s" :initial ""
+(defpoll microphone-muted :interval "1s" :initial ""
   `wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | awk -F '[][]' '{print $2}'`
 )
 (defpoll microphone-volume :interval "60s" :initial ""
@@ -110,9 +115,11 @@
 )
 
 (defwidget microphone []
-  (box :class "microphone icon" 
+  (box :class "microphone icon clickable" 
        :tooltip "${microphone-muted == "MUTED" ? "Muted" : "Volume"}: ${microphone-volume * 100}%"
-    (label :text { microphone-muted == "MUTED" ? "󰍭" : "󰍬" })
+    (button :onclick "wpctl set-mute @DEFAULT_SOURCE@ toggle"  
+      (label :text { microphone-muted == "MUTED" ? "󰍭" : "󰍬" })
+    )
   )
 )
 
@@ -121,7 +128,7 @@
 (defpoll max-b :interval "24h" :initial "" 
   `brightnessctl m`
 )
-(defpoll curr-b :interval "60s" :initial "" 
+(defpoll curr-b :interval "1s" :initial "" 
   `brightnessctl g`
 )
 
@@ -146,18 +153,20 @@
 )
 
 (defwidget battery []
-  (box :class "battery icon" :tooltip "Battery: ${bat-cap}%"
+  (box 
+      :class "battery icon ${bat-cap < 25 && ac != '1' ? 'urgent' : ''}" 
+      :tooltip "Battery: ${bat-cap}%"
     (label :text { ac == "1" ? "${  
         ; Charging 
         bat-cap < 25 ? "󰢟" :
         bat-cap < 50 ? "󱊤" :
-        bat-cap < 75 ? "󱊥" :
+        bat-cap < 85 ? "󱊥" :
         "󱊦" 
     }" : "${
         ; Discharging
         bat-cap < 25 ? "󰂎" :
         bat-cap < 50 ? "󱊡" :
-        bat-cap < 75 ? "󱊢" :
+        bat-cap < 85 ? "󱊢" :
         "󱊣"
     }" }
     )
@@ -185,22 +194,22 @@
 
 ; Powermenu
 (defwidget powermenu []
-  (box :class "powermenu icon"
+  (box :class "powermenu icon clickable"
     (label :text "󰐥")
   )
 )
 
 ; Settingsmenu
 (defwidget settingsmenu []
-  (box :class "settingsmenu icon"
-    (label :text "󰣖")
+  (box :class "settingsmenu icon clickable"
+    (label :text "")
   )
 )
 
 ; Performacemenu
 (defwidget performancemenu []
-  (box :class "performancemenu icon"
-    (label :text "")
+  (box :class "performancemenu icon clickable"
+    (label :text "")
   )
 )
 

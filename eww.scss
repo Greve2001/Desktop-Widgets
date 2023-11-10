@@ -1,17 +1,18 @@
-$primary-color: #e7b077;
-$secondary-color: #765745;
+$highlight-color: #d03958;
+$primary-color: #83b8e2;
+$secondary-color: #1f5b9e;
 
 * {
   all: unset;
 
-  font-size: 26px;
+  font-size: 30px;
   font-weight: bold;
 
   //border: 1px solid white;
 }
 
 .bar {
-  margin: 10px;
+  margin: 10px 10px 0px 10px;
   background-color: #000;
   border: 4px solid $primary-color;
   border-radius: 20px;
@@ -45,15 +46,15 @@ $secondary-color: #765745;
   margin: 0px 10px 0px 10px;
 
   &.empty {
-    color: grey;
-  }
-
-  &.in-use {
     color: $secondary-color;
   }
 
-  &.focus {
+  &.in-use {
     color: $primary-color;
+  }
+
+  &.focus {
+    color: $highlight-color;
   }
 }
 
@@ -67,11 +68,20 @@ $secondary-color: #765745;
 // Icons
 .icon {
   margin: 0px 20px 0px 20px;
+
+  &.clickable :hover {
+    color: $highlight-color;
+  }
 } 
 
 
 // Spacer
 .spacer {
   margin: 0px 30px 0px 30px;
-  color: $primary-color;
+  color: $highlight-color;
+}
+
+
+.urgent {
+  color: red;
 }
