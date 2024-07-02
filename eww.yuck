@@ -61,10 +61,10 @@
 
 ; Network - (Make support ethernet connection)
 (defpoll net :interval "60s" :initial "N/A"
-  `nmcli -t -f SIGNAL,ACTIVE dev wifi | awk -F':' '{if($2=="yes")print$1}'`)
+  `iw dev wlan0 link | awk '/signal/ {gsub("-",""); print $2}'`)
 
 (defpoll ssid :interval "60s" :initial "N/A"
-  `nmcli -t -f SSID,ACTIVE dev wifi | awk -F':' '{if($2=="yes")print$1}'`)
+  `iw dev wlan0 link | awk '/SSID/ {print $2}'`)
 
 (defwidget network []
   (box :class "network icon" 
