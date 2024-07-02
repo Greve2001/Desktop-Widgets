@@ -41,14 +41,12 @@
 (defwidget time-date [] time)
 
 ; System tray
-(defvar tray-elements "[1, 2, 3, 4]")
 (defwidget system-tray []
-  (box :class "system-tray"
-    (for element in tray-elements
-      (box :class "system-tray-element"
-        (label :text "()") 
-      )
-    )
+  (systray :orientation "h"
+    :icon-size 18
+    :spacing 4
+    :space-evenly true
+
   )
 )
 
