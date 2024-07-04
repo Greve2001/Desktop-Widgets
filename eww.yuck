@@ -66,12 +66,14 @@
 
 (defwidget network []
   (box :class "network icon" 
-       :tooltip "${ssid}: ${net}%"
+       :tooltip "${ssid != "" ? 
+        "${ssid}: -${net} dBm"
+        : "Disconnected"}"
     (label :text {
       net == "" ? "󰤭" : ; Offline
-      net < 26 ? "󰤟" :  ; Bad
-      net < 51 ? "󰤢" :  ; Okay
-      net < 76 ? "󰤥" :  ; Good
+      net > 76 ? "󰤟" :  ; Bad
+      net > 51 ? "󰤢" :  ; Okay
+      net > 26 ? "󰤥" :  ; Good
       "󰤨"}              ; Excellent
     )
   )
